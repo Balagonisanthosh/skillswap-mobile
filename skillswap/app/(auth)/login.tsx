@@ -1,14 +1,31 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { loginUser } from "@/services/authService";
+import { useAuthStore } from "@/store/AuthStore";
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useAuthStore();
 
-  const handleLogin = () => {
-    router.replace("/Home"); 
+  const handleLogin = async () => {
+    try {
+      const data = await loginUser(email, password);
+      console.log(data);
+      
+      await login(data.user, data.accessToken);
+      router.replace("/home");
+    } catch (error: any) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -37,11 +54,9 @@ export default function LoginScreen() {
 
       <TouchableOpacity
         style={styles.registerLink}
-        onPress={() => router.push("/auth/register")}
+        onPress={() => router.push("/(auth)/register")}
       >
-        <Text style={styles.registerText}>
-          Don't have an account? Register
-        </Text>
+        <Text style={styles.registerText}>Don't have an account? Register</Text>
       </TouchableOpacity>
     </View>
   );

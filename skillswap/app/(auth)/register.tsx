@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "react-native";
+import { registerUser } from "@/services/authService";
 export default function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -54,6 +55,35 @@ export default function Register() {
   };
 
   const router = useRouter();
+
+  const handleRegister = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("skillsYouKnown", JSON.stringify(knownSkills));
+      formData.append("skillsYouWantToLearn", JSON.stringify(learnSkills));
+      if (profileImage) {
+        const fileType = profileImage.split(".").pop();
+        formData.append("profileImage", {
+          uri: profileImage,
+          type: `image/${fileType}`,
+          name: `profile.${fileType}`,
+        } as any);
+      }
+      await registerUser(formData);
+      alert("register success..");
+
+      router.push("/(auth)/login");
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      alert(message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -136,13 +166,13 @@ export default function Register() {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.loginLink}
-        onPress={() => router.push("/auth/login")}
+        onPress={() => router.push("/(auth)/login")}
       >
         <Text style={styles.loginText}>Already have an account? Login</Text>
       </TouchableOpacity>
@@ -212,36 +242,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   uploadRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: 15,
-},
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 15,
+  },
 
-uploadLabel: {
-  fontSize: 15,
-  color: "#374151",
-  fontWeight: "500",
-},
+  uploadLabel: {
+    fontSize: 15,
+    color: "#374151",
+    fontWeight: "500",
+  },
 
-fileButton: {
-  backgroundColor: "#e5e7eb",
-  paddingVertical: 8,
-  paddingHorizontal: 14,
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: "#d1d5db",
-},
+  fileButton: {
+    backgroundColor: "#e5e7eb",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+  },
 
-fileButtonText: {
-  fontSize: 14,
-  color: "#111827",
-  fontWeight: "500",
-},
+  fileButtonText: {
+    fontSize: 14,
+    color: "#111827",
+    fontWeight: "500",
+  },
 
-fileName: {
-  fontSize: 13,
-  color: "#16a34a",
-  marginBottom: 10,
-},
+  fileName: {
+    fontSize: 13,
+    color: "#16a34a",
+    marginBottom: 10,
+  },
 });

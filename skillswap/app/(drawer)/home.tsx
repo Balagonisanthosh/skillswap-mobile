@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React from 'react';
 import {
   View,
@@ -19,6 +20,9 @@ const HomeScreen = () => {
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("../profile")}>
+        <Text>Go to Profile</Text>
+      </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
