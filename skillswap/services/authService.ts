@@ -27,3 +27,8 @@ export const updateProfile = async (formData: FormData) => {
   });
   return response.data;
 };
+
+export const fetchMentors = async () => {
+  const response = await api.get("/auth/mentorsList");
+  return response.data;
+};
