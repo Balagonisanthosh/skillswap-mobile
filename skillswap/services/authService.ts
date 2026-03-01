@@ -20,6 +20,10 @@ export const registerUser=async(formData:FormData)=>{
 }
 
 export const updateProfile = async (formData: FormData) => {
-  const response = await api.put("/auth/profile", formData);
+  const response = await api.put("/auth/updateProfile", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
