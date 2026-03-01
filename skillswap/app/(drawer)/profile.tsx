@@ -58,6 +58,16 @@ const Profile = () => {
             </Text>
           ))}
         </View>
+        {user.role !=="mentor" ? (
+          <TouchableOpacity style={styles.mentorButton}><Text style={styles.mentorButtonText}> Request as Mentor</Text></TouchableOpacity>
+        ):
+        (
+          <View style={styles.alreadyMentor}>
+            <Text style={styles.alreadyMentorText}>
+              you are already a mentor
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -139,4 +149,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  mentorButton: {
+  marginTop: 20,
+  backgroundColor: "#2563eb",
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 8,
+},
+mentorButtonText: {
+  color: "#ffffff",
+  fontWeight: "600",
+  fontSize: 14,
+},
+alreadyMentor: {
+  marginTop: 20,
+  paddingVertical: 8,
+},
+
+alreadyMentorText: {
+  color: "#16a34a",
+  fontWeight: "600",
+  fontSize:18,
+},
 });

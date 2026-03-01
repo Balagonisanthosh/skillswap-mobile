@@ -1,116 +1,118 @@
 import { fetchMentors } from "@/services/authService";
+import { useAuthStore } from "@/store/AuthStore";
 import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 
 export default function Home() {
   const [mentors, setMentors] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const user = useAuthStore((state) => state.user);
 
-  // 🔥 Fetch mentors on mount
   useEffect(() => {
     const loadMentors = async () => {
       try {
         setLoading(true);
-        setError(null);
-
         const data = await fetchMentors();
-
         setMentors(data.mentors);
-        console.log(mentors); // backend returns { mentors: [...] }
       } catch (err: any) {
-        setError(err?.response?.data?.message || "Failed to fetch mentors");
+        setError("Failed to fetch mentors");
       } finally {
         setLoading(false);
-        
       }
     };
 
     loadMentors();
   }, []);
 
-  return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.welcome}>Welcome back 👋</Text>
-        <Text style={styles.subtitle}>
-          Search, filter, and connect with mentors
+  const renderMentor = ({ item }: any) => (
+    <View style={styles.card}>
+      {/* Left - Avatar */}
+      {item.userId.profileImage ? (
+        <Image
+          source={{ uri: item.userId.profileImage }}
+          style={styles.avatarImage}
+        />
+      ) : (
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>
+            {item.userId.username.charAt(0).toUpperCase()}
+          </Text>
+        </View>
+      )}
+
+      {/* Right - Info */}
+      <View style={styles.infoContainer}>
+        <Text style={styles.name}>{item.userId.username}</Text>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.experience}>
+          {item.experienceYears} yrs experience
         </Text>
 
-        {/* 🔥 Loading State */}
-        {loading && <ActivityIndicator size="large" color="#2563eb" />}
-
-        {/* 🔥 Error State */}
-        {error && <Text style={styles.errorText}>{error}</Text>}
-
-        {/* 🔥 Mentor Cards */}
-        {!loading &&
-          !error &&
-          mentors.map((mentor) => (
-            <View key={mentor._id} style={styles.card}>
-              {/* 🔹 Avatar */}
-              {mentor.userId.profileImage ? (
-                <Image
-                  source={{ uri: mentor.userId.profileImage }}
-                  style={styles.avatarImage}
-                />
-              ) : (
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {mentor.userId.username.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-              )}
-
-              {/* 🔹 Name */}
-              <Text style={styles.name}>{mentor.userId.username}</Text>
-
-              {/* 🔹 Email */}
-              <Text style={styles.email}>{mentor.userId.email}</Text>
-
-              {/* 🔹 Title */}
-              <Text style={styles.title}>{mentor.title}</Text>
-
-              {/* 🔹 Experience */}
-              <Text style={styles.info}>
-                Experience: {mentor.experienceYears} years
-              </Text>
-
-              {/* 🔹 Bio */}
-              <Text style={styles.bio}>{mentor.bio}</Text>
-
-              {/* 🔹 Skills */}
-              <View style={styles.skillContainer}>
-                {mentor.skills.map((skill: string, index: number) => (
-                  <View key={index} style={styles.skillBadge}>
-                    <Text style={styles.skillText}>{skill}</Text>
-                  </View>
-                ))}
-              </View>
-
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>View Details</Text>
-              </TouchableOpacity>
+        <View style={styles.skillContainer}>
+          {item.skills.slice(0, 3).map((skill: string, index: number) => (
+            <View key={index} style={styles.skillBadge}>
+              <Text style={styles.skillText}>{skill}</Text>
             </View>
           ))}
+        </View>
 
-        {/* 🔥 Empty State */}
-        {!loading && mentors.length === 0 && (
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Connect</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#2563eb" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.greetingText}>Welcome back, <Text style={styles.username}>{user?.username || "User"}</Text> 👋</Text>
+      <Text style={styles.welcome}>Find Your Mentor</Text>
+
+      <TextInput placeholder="Search mentors..." style={styles.searchInput} />
+
+      <FlatList
+        data={mentors}
+        keyExtractor={(item) => item._id}
+        renderItem={renderMentor}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 30 }}
+      />
+
+      {!loading && mentors.length === 0 && (
+        <View style={styles.center}>
           <Text style={styles.emptyText}>No mentors available</Text>
-        )}
-      </ScrollView>
+        </View>
+      )}
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -119,116 +121,94 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
 
-  // 🔹 Header Text
   welcome: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
-    marginBottom: 4,
+    marginBottom: 15,
     color: "#111827",
   },
 
-  subtitle: {
-    fontSize: 14,
-    color: "#6b7280",
-    marginBottom: 20,
-  },
-
-  // 🔹 Search Bar
   searchInput: {
     backgroundColor: "#ffffff",
     padding: 14,
-    borderRadius: 12,
-    marginBottom: 16,
+    borderRadius: 14,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    fontSize: 14,
-    color: "#111827",
   },
 
-  // 🔹 Filters
-  filterContainer: {
-    marginBottom: 20,
-  },
-
-  filterChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: "#e5e7eb",
-    borderRadius: 20,
-    marginRight: 10,
-  },
-
-  activeChip: {
-    backgroundColor: "#2563eb",
-  },
-
-  filterText: {
-    fontSize: 12,
-    color: "#374151",
-  },
-
-  activeText: {
-    color: "#ffffff",
-  },
-
-  // 🔹 Card
   card: {
+    flexDirection: "row",
     backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 18,
-
-    // Shadow iOS
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-
-    // Shadow Android
     elevation: 3,
   },
 
-  // 🔹 Avatar
+  avatarImage: {
+    width: 65,
+    height: 65,
+    borderRadius: 32,
+  },
+
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 65,
+    height: 65,
+    borderRadius: 32,
     backgroundColor: "#2563eb",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+  },
+
+  greetingText:{
+
+    fontSize:20,
+    fontWeight:"400",
+  },
+  username:{
+    color:"#2563eb",
+    fontWeight:"500",
+
   },
 
   avatarText: {
-    color: "#ffffff",
-    fontSize: 18,
+    color: "#fff",
+    fontSize: 22,
     fontWeight: "700",
   },
 
-  // 🔹 Mentor Info
+  infoContainer: {
+    flex: 1,
+    marginLeft: 15,
+  },
+
   name: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
     color: "#111827",
   },
 
-  email: {
-    fontSize: 13,
+  title: {
+    fontSize: 14,
+    color: "#2563eb",
+    marginTop: 4,
+  },
+
+  experience: {
+    fontSize: 12,
     color: "#6b7280",
-    marginBottom: 10,
+    marginTop: 4,
   },
 
-  info: {
-    fontSize: 13,
-    color: "#374151",
-    marginBottom: 8,
-  },
-
-  // 🔹 Skills
   skillContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 12,
+    marginTop: 8,
   },
 
   skillBadge: {
@@ -243,56 +223,34 @@ const styles = StyleSheet.create({
   skillText: {
     fontSize: 12,
     color: "#2563eb",
-    fontWeight: "500",
   },
 
-  // 🔹 Button
   button: {
-    borderWidth: 1,
-    borderColor: "#2563eb",
-    paddingVertical: 10,
-    borderRadius: 10,
+    marginTop: 10,
+    backgroundColor: "#2563eb",
+    paddingVertical: 8,
+    borderRadius: 8,
     alignItems: "center",
   },
 
   buttonText: {
-    color: "#2563eb",
+    color: "#ffffff",
     fontWeight: "600",
-    fontSize: 14,
   },
 
-  // 🔹 Loading / Error / Empty States
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   errorText: {
     color: "#ef4444",
-    textAlign: "center",
-    marginVertical: 15,
     fontSize: 14,
   },
 
   emptyText: {
-    textAlign: "center",
-    marginTop: 30,
     color: "#6b7280",
     fontSize: 14,
   },
-  avatarImage: {
-  width: 52,
-  height: 52,
-  borderRadius: 26,
-  marginBottom: 12,
-},
-
-title: {
-  fontSize: 14,
-  fontWeight: "600",
-  color: "#2563eb",
-  marginBottom: 6,
-},
-
-bio: {
-  fontSize: 13,
-  color: "#4b5563",
-  marginBottom: 10,
-  lineHeight: 18,
-},
 });

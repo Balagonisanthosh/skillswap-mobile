@@ -10,6 +10,7 @@ import {
 import { useAuthStore } from "@/store/AuthStore";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function DrawerLayout() {
   const user = useAuthStore((state) => state.user);
@@ -17,7 +18,7 @@ export default function DrawerLayout() {
 
   return (
     <>
-    <StatusBar style="light" backgroundColor="#0808EE" />
+    <StatusBar style="dark" backgroundColor="#0808EE" translucent={false} />
     <Drawer
       screenOptions={{
         headerTitleAlign: "left",
@@ -32,26 +33,39 @@ export default function DrawerLayout() {
           </View>
         ),
 
-        headerRight: () => (
-          <TouchableOpacity
-            onPress={() => router.push("/profile")}
-            style={styles.avatarWrapper}
-            activeOpacity={0.7}
-          >
-            {user?.profileImage ? (
-              <Image
-                source={{ uri: user.profileImage }}
-                style={styles.avatarImage}
-              />
-            ) : (
-              <View style={styles.avatarFallback}>
-                <Text style={styles.avatarText}>
-                  {user?.username?.charAt(0).toUpperCase() || "U"}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        ),
+       headerRight: () => (
+  <View style={styles.rightContainer}>
+    
+    {/* 🔔 Notification Icon */}
+    <TouchableOpacity
+      style={styles.notificationWrapper}
+      activeOpacity={0.7}
+    >
+      <Ionicons name="notifications-outline" size={24} color="#2563eb" />
+    </TouchableOpacity>
+
+    {/* 👤 Avatar */}
+    <TouchableOpacity
+      onPress={() => router.push("/profile")}
+      style={styles.avatarWrapper}
+      activeOpacity={0.7}
+    >
+      {user?.profileImage ? (
+        <Image
+          source={{ uri: user.profileImage }}
+          style={styles.avatarImage}
+        />
+      ) : (
+        <View style={styles.avatarFallback}>
+          <Text style={styles.avatarText}>
+            {user?.username?.charAt(0).toUpperCase() || "U"}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+
+  </View>
+),
       }}
     />
     </>
@@ -114,4 +128,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  rightContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginRight: 10,
+},
+
+notificationWrapper: {
+  marginRight: 15,
+},
 });
