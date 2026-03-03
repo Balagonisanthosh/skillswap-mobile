@@ -3,7 +3,7 @@ import { Text, View, StyleSheet } from "react-native";
 export default function ChangePassword() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Change Password</Text>
+      <Text style={styles.title}>Change Password </Text>
     </View>
   );
 }
