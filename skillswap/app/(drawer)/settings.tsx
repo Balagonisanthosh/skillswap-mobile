@@ -37,9 +37,9 @@ const Settings = () => {
       <Text style={styles.title}>Settings</Text>
 
       <View style={styles.card}>
-        <Text style={styles.option}>Account</Text>
-        <Text style={styles.option}>Notifications</Text>
-        <Text style={styles.option}>Privacy</Text>
+        <Text style={styles.option} onPress={()=>router.push("/screens/account")}>Account</Text>
+        <Text style={styles.option} onPress={()=>router.push("/screens/notification")}>Notifications</Text>
+        <Text style={styles.option} onPress={()=>router.push("/screens/pravicy")}>Privacy</Text>
         <Text style={styles.option}>Help & Support</Text>
       </View>
 

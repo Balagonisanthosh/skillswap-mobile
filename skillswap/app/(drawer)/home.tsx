@@ -14,8 +14,12 @@ import {
 
 export default function Home() {
   const [mentors, setMentors] = useState<any[]>([]);
+  const [filteredMentors, setFilteredMentors] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
@@ -24,6 +28,7 @@ export default function Home() {
         setLoading(true);
         const data = await fetchMentors();
         setMentors(data.mentors);
+        setFilteredMentors(data.mentors);
       } catch (err: any) {
         setError("Failed to fetch mentors");
       } finally {
@@ -34,9 +39,36 @@ export default function Home() {
     loadMentors();
   }, []);
 
+  // 🔹 Debounce effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    if (!debouncedSearch.trim()) {
+      setFilteredMentors(mentors);
+      return;
+    }
+
+    const query = debouncedSearch.toLowerCase();
+
+    const filtered = mentors.filter((mentor) => {
+      return (
+        mentor.userId.username.toLowerCase().includes(query) ||
+        mentor.title.toLowerCase().includes(query) ||
+        mentor.skills.join(" ").toLowerCase().includes(query)
+      );
+    });
+
+    setFilteredMentors(filtered);
+  }, [debouncedSearch, mentors]);
+
   const renderMentor = ({ item }: any) => (
     <View style={styles.card}>
-      {/* Left - Avatar */}
       {item.userId.profileImage ? (
         <Image
           source={{ uri: item.userId.profileImage }}
@@ -50,7 +82,6 @@ export default function Home() {
         </View>
       )}
 
-      {/* Right - Info */}
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.userId.username}</Text>
         <Text style={styles.title}>{item.title}</Text>
@@ -91,34 +122,57 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.greetingText}>Welcome back, <Text style={styles.username}>{user?.username || "User"}</Text> 👋</Text>
+      <Text style={styles.greetingText}>
+        Welcome back,{" "}
+        <Text style={styles.username}>
+          {user?.username || "User"}
+        </Text>{" "}
+        👋
+      </Text>
+
       <Text style={styles.welcome}>Find Your Mentor</Text>
 
-      <TextInput placeholder="Search mentors..." style={styles.searchInput} />
-
-      <FlatList
-        data={mentors}
-        keyExtractor={(item) => item._id}
-        renderItem={renderMentor}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 30 }}
+      <TextInput
+        placeholder="Search mentors..."
+        placeholderTextColor="#9ca3af"
+        style={styles.searchInput}
+        value={search}
+        onChangeText={setSearch}
       />
 
-      {!loading && mentors.length === 0 && (
+      {filteredMentors.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.emptyText}>No mentors available</Text>
+          <Text style={styles.emptyText}>No mentors found</Text>
         </View>
+      ) : (
+        <FlatList
+          data={filteredMentors}
+          keyExtractor={(item) => item._id}
+          renderItem={renderMentor}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 30 }}
+        />
       )}
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8fafc",
     paddingHorizontal: 20,
     paddingTop: 20,
+  },
+
+  greetingText: {
+    fontSize: 20,
+    fontWeight: "400",
+    marginBottom: 5,
+  },
+
+  username: {
+    color: "#2563eb",
+    fontWeight: "600",
   },
 
   welcome: {
@@ -135,6 +189,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "#e5e7eb",
+    fontSize: 14,
   },
 
   card: {
@@ -163,17 +218,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#2563eb",
     justifyContent: "center",
     alignItems: "center",
-  },
-
-  greetingText:{
-
-    fontSize:20,
-    fontWeight:"400",
-  },
-  username:{
-    color:"#2563eb",
-    fontWeight:"500",
-
   },
 
   avatarText: {

@@ -40,6 +40,7 @@ export default function DrawerLayout() {
     <TouchableOpacity
       style={styles.notificationWrapper}
       activeOpacity={0.7}
+      onPress={()=>router.push("/screens/notification")}
     >
       <Ionicons name="notifications-outline" size={24} color="#2563eb" />
     </TouchableOpacity>

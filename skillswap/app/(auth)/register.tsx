@@ -66,7 +66,7 @@ export default function Register() {
       formData.append("skillsYouWantToLearn", JSON.stringify(learnSkills));
       if (profileImage) {
         const fileType = profileImage.split(".").pop();
-        formData.append("profileImage", {
+        formData.append("photo", {
           uri: profileImage,
           type: `image/${fileType}`,
           name: `profile.${fileType}`,

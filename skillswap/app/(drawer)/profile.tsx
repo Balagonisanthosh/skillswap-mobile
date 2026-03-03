@@ -21,13 +21,7 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => router.push("/screens/edit-profile")}
-          
-        >
-          <Text style={styles.editButtonText}>Edit</Text>
-        </TouchableOpacity>
+        
         {user.profileImage ? (
           <Image source={{ uri: user.profileImage }} style={styles.avatar} />
         ) : (
@@ -133,22 +127,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#444",
   },
-  editButton: {
-    position: "absolute",
-    top: 15,
-    right: 15,
-    backgroundColor: "#2563eb",
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    zIndex: 1,
-  },
-
-  editButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  
   mentorButton: {
   marginTop: 20,
   backgroundColor: "#2563eb",
