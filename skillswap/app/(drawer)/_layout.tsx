@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 
+
 export default function DrawerLayout() {
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitleContainer: {
-    paddingLeft: 8,
+    paddingLeft:8,
   },
 
   // 🔹 Brand Section
