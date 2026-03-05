@@ -1,4 +1,4 @@
-import { fetchMentors } from "@/services/authService";
+import { fetchMentors, sendConnectionRequest } from "@/services/authService";
 import { useAuthStore } from "@/store/AuthStore";
 import React, { useEffect, useState } from "react";
 import {
@@ -10,6 +10,7 @@ import {
   Image,
   ActivityIndicator,
   TextInput,
+  Modal,
 } from "react-native";
 
 export default function Home() {
@@ -20,6 +21,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState<any>(null);
+
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
@@ -29,7 +33,7 @@ export default function Home() {
         const data = await fetchMentors();
         setMentors(data.mentors);
         setFilteredMentors(data.mentors);
-      } catch (err: any) {
+      } catch {
         setError("Failed to fetch mentors");
       } finally {
         setLoading(false);
@@ -39,7 +43,6 @@ export default function Home() {
     loadMentors();
   }, []);
 
-  // 🔹 Debounce effect
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -66,6 +69,23 @@ export default function Home() {
 
     setFilteredMentors(filtered);
   }, [debouncedSearch, mentors]);
+
+  const handleSendRequest = async () => {
+    try {
+      const requestResult = await sendConnectionRequest(selectedMentor._id);
+
+      alert(requestResult.message || "Connection request sent!");
+
+      setModalVisible(false);
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to send request";
+
+      alert(message);
+    }
+  };
 
   const renderMentor = ({ item }: any) => (
     <View style={styles.card}>
@@ -97,7 +117,13 @@ export default function Home() {
           ))}
         </View>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            setSelectedMentor(item);
+            setModalVisible(true);
+          }}
+        >
           <Text style={styles.buttonText}>Connect</Text>
         </TouchableOpacity>
       </View>
@@ -124,10 +150,7 @@ export default function Home() {
     <View style={styles.container}>
       <Text style={styles.greetingText}>
         Welcome back,{" "}
-        <Text style={styles.username}>
-          {user?.username || "User"}
-        </Text>{" "}
-        👋
+        <Text style={styles.username}>{user?.username || "User"}</Text> 👋
       </Text>
 
       <Text style={styles.welcome}>Find Your Mentor</Text>
@@ -140,19 +163,36 @@ export default function Home() {
         onChangeText={setSearch}
       />
 
-      {filteredMentors.length === 0 ? (
-        <View style={styles.center}>
-          <Text style={styles.emptyText}>No mentors found</Text>
+      <FlatList
+        data={filteredMentors}
+        keyExtractor={(item) => item._id}
+        renderItem={renderMentor}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 30 }}
+      />
+
+      {/* Modal */}
+      <Modal transparent visible={modalVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Send connection request?</Text>
+
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={handleSendRequest}
+            >
+              <Text style={styles.sendText}>Send Request</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      ) : (
-        <FlatList
-          data={filteredMentors}
-          keyExtractor={(item) => item._id}
-          renderItem={renderMentor}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 30 }}
-        />
-      )}
+      </Modal>
     </View>
   );
 }
@@ -296,5 +336,50 @@ const styles = StyleSheet.create({
   emptyText: {
     color: "#6b7280",
     fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalContainer: {
+    backgroundColor: "#fff",
+    width: "80%",
+    borderRadius: 12,
+    padding: 20,
+  },
+
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+
+  sendButton: {
+    backgroundColor: "#2563eb",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+
+  sendText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+
+  cancelButton: {
+    backgroundColor: "#e5e7eb",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+
+  cancelText: {
+    color: "#111827",
+    fontWeight: "500",
   },
 });

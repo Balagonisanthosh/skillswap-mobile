@@ -32,3 +32,11 @@ export const fetchMentors = async () => {
   const response = await api.get("/auth/mentorsList");
   return response.data;
 };
+
+export const sendConnectionRequest = async (mentorId: string) => {
+  const response = await api.post("/auth/connectionRequest", {
+    mentorId,
+  });
+
+  return response.data;
+};
