@@ -19,57 +19,57 @@ export default function DrawerLayout() {
 
   return (
     <>
-    <StatusBar style="dark" backgroundColor="#0808EE" translucent={false} />
-    <Drawer
-      screenOptions={{
-        headerTitleAlign: "left",
-        headerStyle: styles.header,
-        headerShadowVisible: false,
-        headerTitleContainerStyle: styles.headerTitleContainer,
+      <StatusBar style="dark" backgroundColor="#0808EE" translucent={false} />
+      <Drawer
+        screenOptions={{
+          headerTitleAlign: "left",
+          headerStyle: styles.header,
+          headerShadowVisible: false,
+          headerTitleContainerStyle: styles.headerTitleContainer,
 
-        // 🔥 Proper Brand Layout
-        headerTitle: () => (
-          <View style={styles.brandWrapper}>
-            <Text style={styles.brandText}>SkillSwap</Text>
-          </View>
-        ),
+          // 🔥 Proper Brand Layout
+          headerTitle: () => (
+            <View style={styles.brandWrapper}>
+              <Text style={styles.brandText}>SkillSwap</Text>
+            </View>
+          ),
 
-       headerRight: () => (
-  <View style={styles.rightContainer}>
-    
-    {/* 🔔 Notification Icon */}
-    <TouchableOpacity
-      style={styles.notificationWrapper}
-      activeOpacity={0.7}
-      onPress={()=>router.push("/screens/notification")}
-    >
-      <Ionicons name="notifications-outline" size={24} color="#2563eb" />
-    </TouchableOpacity>
+          headerRight: () => (
+            <View style={styles.rightContainer}>
 
-    {/* 👤 Avatar */}
-    <TouchableOpacity
-      onPress={() => router.push("/profile")}
-      style={styles.avatarWrapper}
-      activeOpacity={0.7}
-    >
-      {user?.profileImage ? (
-        <Image
-          source={{ uri: user.profileImage }}
-          style={styles.avatarImage}
-        />
-      ) : (
-        <View style={styles.avatarFallback}>
-          <Text style={styles.avatarText}>
-            {user?.username?.charAt(0).toUpperCase() || "U"}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
+              {/* 🔔 Notification Icon */}
+              <TouchableOpacity
+                style={styles.notificationWrapper}
+                activeOpacity={0.7}
+                onPress={() => router.push("/screens/chatListScreen")}
+              >
+                <Ionicons name="notifications-outline" size={24} color="#2563eb" />
+              </TouchableOpacity>
 
-  </View>
-),
-      }}
-    />
+              {/* 👤 Avatar */}
+              <TouchableOpacity
+                onPress={() => router.push("/profile")}
+                style={styles.avatarWrapper}
+                activeOpacity={0.7}
+              >
+                {user?.profileImage ? (
+                  <Image
+                    source={{ uri: user.profileImage }}
+                    style={styles.avatarImage}
+                  />
+                ) : (
+                  <View style={styles.avatarFallback}>
+                    <Text style={styles.avatarText}>
+                      {user?.username?.charAt(0).toUpperCase() || "U"}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+
+            </View>
+          ),
+        }}
+      />
     </>
   );
 }
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitleContainer: {
-    paddingLeft:8,
+    paddingLeft: 8,
   },
 
   // 🔹 Brand Section
@@ -131,12 +131,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   rightContainer: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginRight: 10,
-},
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 10,
+  },
 
-notificationWrapper: {
-  marginRight: 15,
-},
+  notificationWrapper: {
+    marginRight: 15,
+  },
 });
