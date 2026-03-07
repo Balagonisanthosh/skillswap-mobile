@@ -70,11 +70,13 @@ export default function MentorRequestForm() {
 
       router.back();
     } catch (error: any) {
-      console.log("STATUS:", error?.response?.status);
-      console.log("DATA:", error?.response?.data);
-      console.log("FULL ERROR:", error);
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        error.message ||
+        "Submission failed";
 
-      alert(error?.response?.data?.message || "Submission failed");
+      alert(message);
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -16,14 +17,24 @@ export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const { login } = useAuthStore();
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please enter email and password");
+      return;
+    }
+
     try {
+      setLoading(true);
+
       const data = await loginUser(email, password);
       console.log(data);
 
       await login(data.user, data.accessToken);
+
       router.replace("/home");
     } catch (error: any) {
       const message =
@@ -32,6 +43,8 @@ export default function LoginScreen() {
         "Something went wrong";
 
       alert(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,6 +62,7 @@ export default function LoginScreen() {
           onChangeText={setEmail}
           keyboardType="email-address"
           style={styles.input}
+          autoCapitalize="none"
         />
 
         <TextInput
@@ -59,8 +73,16 @@ export default function LoginScreen() {
           style={styles.input}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
