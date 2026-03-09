@@ -1,56 +1,44 @@
 import { View, Text, StyleSheet, Animated } from "react-native";
 import { useEffect, useRef } from "react";
 
-export default function AnimatedSplash() {
-  const text = "SkillSwap".split("");
-
-  const translateY = useRef(text.map(() => new Animated.Value(-60))).current;
-
-  const scale = useRef(text.map(() => new Animated.Value(0.5))).current;
+export default function SplashAnimation({ onFinish }: { onFinish?: () => void }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
-    const animations = text.map((_, i) =>
+    Animated.sequence([
       Animated.parallel([
-        Animated.spring(translateY[i], {
-          toValue: 0,
-          friction: 8, // more friction = slower bounce
-          tension: 40, // lower tension = slower motion
-          delay: i * 180, // delay between letters
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 800,
           useNativeDriver: true,
         }),
-        Animated.spring(scale[i], {
+        Animated.spring(scale, {
           toValue: 1,
-          friction: 8,
-          tension: 40,
-          delay: i * 180,
+          friction: 5,
+          tension: 60,
           useNativeDriver: true,
         }),
       ]),
-    );
-
-    Animated.stagger(180, animations).start();
+      Animated.delay(1200),
+    ]).start(() => {
+      if (onFinish) onFinish(); // ✅ safe check
+    });
   }, []);
 
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
-        {text.map((letter, index) => (
-          <Animated.Text
-            key={index}
-            style={[
-              styles.letter,
-              {
-                transform: [
-                  { translateY: translateY[index] },
-                  { scale: scale[index] },
-                ],
-              },
-            ]}
-          >
-            {letter}
-          </Animated.Text>
-        ))}
-      </View>
+      <Animated.Text
+        style={[
+          styles.title,
+          {
+            opacity,
+            transform: [{ scale }],
+          },
+        ]}
+      >
+        SkillSwap
+      </Animated.Text>
     </View>
   );
 }
@@ -62,17 +50,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  row: {
-    flexDirection: "row",
-  },
-  letter: {
-    fontSize: 44,
+  title: {
+    fontSize: 46,
     fontWeight: "bold",
     color: "#fff",
-    marginHorizontal: 2,
-
-    // static glow effect
-    textShadowColor: "#00ffff",
+    textShadowColor: "#00FFFF",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 15,
   },
