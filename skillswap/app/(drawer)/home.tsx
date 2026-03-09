@@ -84,7 +84,7 @@ export default function Home() {
         "Failed to send request";
 
       alert(message);
-    }
+    } 
   };
 
   const renderMentor = ({ item }: any) => (

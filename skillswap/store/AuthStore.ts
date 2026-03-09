@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
+import { api } from "../services/api";
 
 interface User {
   _id: string;
@@ -21,8 +22,8 @@ interface AuthState {
   login: (user: User, token: string) => Promise<void>;
   logout: () => Promise<void>;
   loadToken: () => Promise<void>;
+  fetchProfile: () => Promise<void>;
   updateUser: (user: User) => void;
-  setUser: (user: User) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -31,7 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isLoading: true,
 
-  // 🔐 Login
+  // 🔐 LOGIN
   login: async (user, token) => {
     await SecureStore.setItemAsync("authToken", token);
 
@@ -42,7 +43,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
-
+  // 🚪 LOGOUT
   logout: async () => {
     await SecureStore.deleteItemAsync("authToken");
 
@@ -53,6 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
+  // 🔄 LOAD TOKEN WHEN APP STARTS
   loadToken: async () => {
     try {
       const token = await SecureStore.getItemAsync("authToken");
@@ -62,20 +64,42 @@ export const useAuthStore = create<AuthState>((set) => ({
           token,
           isAuthenticated: true,
         });
+
+        // fetch profile automatically
+        await useAuthStore.getState().fetchProfile();
       }
     } catch (error) {
-      console.log("Error loading token:", error);
+      console.log("Token load error:", error);
     } finally {
       set({ isLoading: false });
     }
   },
 
-  updateUser: (user) => {
-    set({ user });
+  // 👤 FETCH USER PROFILE
+  fetchProfile: async () => {
+    try {
+      const res = await api.get("/auth/profile");
+
+      set({
+        user: res.data.user,
+        isAuthenticated: true,
+      });
+    } catch (error) {
+      console.log("Profile fetch failed:", error);
+
+      // if refresh also fails → logout
+      await SecureStore.deleteItemAsync("authToken");
+
+      set({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+      });
+    }
   },
 
-  // 👤 Manually set user
-  setUser: (user) => {
+  // 🔄 UPDATE USER
+  updateUser: (user) => {
     set({ user });
   },
 }));

@@ -34,10 +34,22 @@ export default function ChatScreen() {
 
   useEffect(() => {
     if (!socket) return;
-    
+
     const handleReceiveMessage = (newMessage: any) => {
       if (newMessage.conversationId === conversationId) {
-        setMessages((prev) => [...prev, newMessage]);
+        setMessages((prev) => {
+          const isMe = newMessage.senderId?._id === user?._id || newMessage.senderId === user?._id;
+          if (isMe) {
+            const index = prev.findIndex((m: any) => m.isOptimistic && m.text === newMessage.text);
+            if (index !== -1) {
+              const updated = [...prev];
+              updated[index] = newMessage;
+              return updated;
+            }
+          }
+          if (prev.some((m: any) => m._id === newMessage._id)) return prev;
+          return [...prev, newMessage];
+        });
         socket.emit("messagesRead", { conversationId, readerId: user?._id });
         setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
       }
@@ -54,8 +66,7 @@ export default function ChatScreen() {
     setLoading(true);
     try {
       const conv = await chatService.createConversation(receiverId as string);
-      router.setParams({ conversationId: conv._id }); // Update params
-      // Let the dependency arrays fetch messages and join room respectively.
+      router.setParams({ conversationId: conv._id });
     } catch (error) {
       console.error("Failed to create conversation", error);
       setLoading(false);
@@ -105,8 +116,8 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
-        style={styles.keyboardAvoidingView} 
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         {/* Header */}
@@ -127,18 +138,18 @@ export default function ChatScreen() {
         {/* Messages */}
         <View style={styles.messagesContainer}>
           {loading ? (
-             <ActivityIndicator size="large" color="#6366f1" style={styles.loadingIndicator} />
+            <ActivityIndicator size="large" color="#6366f1" style={styles.loadingIndicator} />
           ) : (
-             <FlatList
-               ref={flatListRef}
-               data={messages}
-               keyExtractor={(item, index) => item._id || String(index)}
-               renderItem={renderItem}
-               showsVerticalScrollIndicator={false}
-               contentContainerStyle={styles.messagesListContent}
-               onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-               onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
-             />
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              keyExtractor={(item, index) => item._id || String(index)}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.messagesListContent}
+              onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+              onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+            />
           )}
         </View>
 
@@ -163,7 +174,7 @@ export default function ChatScreen() {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity style={styles.micBtn}>
-               <Ionicons name="mic-outline" size={24} color="#64748b" />
+              <Ionicons name="mic-outline" size={24} color="#64748b" />
             </TouchableOpacity>
           )}
         </View>
