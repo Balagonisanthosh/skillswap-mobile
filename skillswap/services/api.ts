@@ -24,38 +24,4 @@ api.interceptors.request.use(
   },
 );
 
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
 
-    // if token expired
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        const refreshResponse = await axios.post(
-          `${BASE_URL}/auth/refresh`,
-          {},
-          { withCredentials: true },
-        );
-
-        const newAccessToken = refreshResponse.data.accessToken;
-
-        // save new token
-        await SecureStore.setItemAsync("authToken", newAccessToken);
-
-        // update header
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        // retry original request
-        return api(originalRequest);
-      } catch (refreshError) {
-        console.log("Refresh token expired. Logging out.");
-        await SecureStore.deleteItemAsync("authToken");
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  },
-);
