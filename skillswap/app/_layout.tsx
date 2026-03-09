@@ -1,15 +1,32 @@
 import { Stack } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/AuthStore";
+import AnimatedSplash from "./components/AnimatedSplash";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { loadToken, isAuthenticated, isLoading } = useAuthStore();
+  const { loadToken, isAuthenticated } = useAuthStore();
+  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    loadToken();
+    const prepare = async () => {
+      await loadToken();
+
+      // show animation for 1.2s
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
+      setAppReady(true);
+      await SplashScreen.hideAsync();
+    };
+
+    prepare();
   }, []);
 
-  if (isLoading) return null;   
+  if (!appReady) {
+    return <AnimatedSplash />;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
