@@ -37,13 +37,9 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/skillswap_logo.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
+          
             "backgroundColor": "#000000"
-          }
+          
         }
       ]
     ],
