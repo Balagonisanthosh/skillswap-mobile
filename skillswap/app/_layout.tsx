@@ -1,8 +1,8 @@
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/AuthStore";
-import AnimatedSplash from "./components/AnimatedSplash";
 import * as SplashScreen from "expo-splash-screen";
+import AnimatedSplash from "./components/AnimationSplash";
 
 SplashScreen.preventAutoHideAsync();
 
