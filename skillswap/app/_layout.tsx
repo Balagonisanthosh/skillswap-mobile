@@ -1,6 +1,5 @@
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { View, ActivityIndicator } from "react-native";
 import { useAuthStore } from "../store/AuthStore";
 
 export default function RootLayout() {
@@ -10,14 +9,7 @@ export default function RootLayout() {
     loadToken();
   }, []);
 
-  // Show loader while checking token
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  if (isLoading) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
