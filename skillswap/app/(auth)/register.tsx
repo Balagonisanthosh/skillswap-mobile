@@ -58,7 +58,7 @@ export default function Register() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.7,
     });
 
     if (!result.canceled) {
@@ -68,6 +68,11 @@ export default function Register() {
 
   const handleRegister = async () => {
     try {
+      if (!username || !email || !password) {
+        alert("All fields are required");
+        return;
+      }
+
       setLoading(true);
 
       const formData = new FormData();
@@ -119,24 +124,33 @@ export default function Register() {
 
           <TextInput
             placeholder="Username"
+            placeholderTextColor="#9CA3AF"
             value={username}
             onChangeText={setUsername}
+            autoCorrect={false}
+            autoComplete="off"
             style={styles.input}
           />
 
           <TextInput
             placeholder="Email"
+            placeholderTextColor="#9CA3AF"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
             style={styles.input}
           />
 
           <TextInput
             placeholder="Password"
+            placeholderTextColor="#9CA3AF"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            autoCorrect={false}
             style={styles.input}
           />
 
@@ -156,6 +170,7 @@ export default function Register() {
 
           <TextInput
             placeholder="Type skills you know and press enter"
+            placeholderTextColor="#9CA3AF"
             value={knownSkillInput}
             onChangeText={setKnownSkillInput}
             returnKeyType="done"
@@ -179,10 +194,11 @@ export default function Register() {
 
           <TextInput
             placeholder="Type skills you want to learn and press enter"
+            placeholderTextColor="#9CA3AF"
             value={learnSkillInput}
             onChangeText={setLearnSkillInput}
-            onSubmitEditing={addLearnSkill}
             returnKeyType="done"
+            onSubmitEditing={addLearnSkill}
             style={styles.input}
           />
 
@@ -250,6 +266,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 15,
     backgroundColor: "#ffffff",
+    color: "#111827",
   },
 
   button: {
