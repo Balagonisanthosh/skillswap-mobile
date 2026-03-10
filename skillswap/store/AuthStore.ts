@@ -59,14 +59,35 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const token = await SecureStore.getItemAsync("authToken");
 
-      if (token) {
-        set({
-          token,
-          isAuthenticated: true,
-        });
+      if (!token) {
+        set({ isLoading: false });
+        return;
+      }
 
-        // fetch profile automatically
+      set({
+        token,
+        isAuthenticated: true,
+      });
+
+      try {
         await useAuthStore.getState().fetchProfile();
+      } catch (err: any) {
+        if (err.response?.status === 401) {
+          console.log("Refreshing access token...");
+
+          const res = await api.post("/auth/refresh");
+
+          const newAccessToken = res.data.accessToken;
+
+          await SecureStore.setItemAsync("authToken", newAccessToken);
+
+          set({
+            token: newAccessToken,
+            isAuthenticated: true,
+          });
+
+          await useAuthStore.getState().fetchProfile();
+        }
       }
     } catch (error) {
       console.log("Token load error:", error);
@@ -86,15 +107,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (error) {
       console.log("Profile fetch failed:", error);
-
-      // if refresh also fails → logout
-      await SecureStore.deleteItemAsync("authToken");
-
-      set({
-        user: null,
-        token: null,
-        isAuthenticated: false,
-      });
+      throw error; // important
     }
   },
 
